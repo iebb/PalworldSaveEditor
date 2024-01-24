@@ -23,13 +23,14 @@ code {
 }
 
 .status-bar {
-  padding: 4px;
+  padding: 8px 8px;
   background: #3883fa;
   color: white;
   text-align: center;
   font-size: 15px;
   flex-grow: 0;
   display: flex;
+  gap: 10px;
 }
 
 .error {
@@ -42,4 +43,8 @@ code {
 
 .space {
   flex: 1;
+}
+
+a {
+  color: #33ffff;
 }

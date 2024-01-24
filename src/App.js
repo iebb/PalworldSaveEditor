@@ -72,12 +72,6 @@ function App() {
 
           const rootProps = {...gvas.root.properties};
 
-          // setVersion(rootProps.Version.Int.value);
-          // setTimestamp(rootProps.Timestamp.Struct.value);
-          // delete rootProps.Version;
-          // delete rootProps.Timestamp;
-
-
           setContent({ json: rootProps });
           setData(data);
           setFileName(fileName);
@@ -91,7 +85,7 @@ function App() {
               <>
                 <div>Palworld.TF: Editing {fileName}</div>
                 <div className="space"></div>
-                <div>{((data.lenDecompressed) / 1024).toFixed(1)}k decompressed, {((data.lenCompressed) / 1024).toFixed(1)}k compressed</div>
+                <div>{((data.lenDecompressed) / 1048576).toFixed(2)}M decompressed, {((data.lenCompressed) / 1048576).toFixed(2)}M compressed</div>
               </>
             ) : (
               <span>Palworld.TF: Drag a Palworld .sav file first</span>
@@ -106,7 +100,9 @@ function App() {
           }}
         />
         <div className={`status-bar small`}>
-          made by ieb, based on uesave-rs
+          <div><a href="https://github.com/iebb/PalworldSaveEditor/issues">issues / github</a></div>
+          <div>made by ieb, based on uesave-rs</div>
+          <div>some files such as "Level.sav" could be huge and would take minutes to load.</div>
         </div>
       </div>
     </Dropper>
