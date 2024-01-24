@@ -16,6 +16,13 @@ module.exports = function override(config, env) {
     .oneOf.find((i) => i.type === "asset/resource")
     .exclude.push(/\.wasm$/);
 
+  config.module.rules.unshift({
+    test: /\.m?js$/,
+    resolve: {
+      fullySpecified: false, // disable the behavior
+    },
+  });
+
   config.resolve.extensions = [...config.resolve.extensions, ".ts", ".js"]
   config.plugins = [
     ...config.plugins,

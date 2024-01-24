@@ -2,7 +2,6 @@ import {useState} from "react";
 import VanillaJSONEditor from "./components/VanillaJSONEditor";
 import {Dropper} from "./components/Dropper";
 import { faSave } from '@fortawesome/free-regular-svg-icons'
-import './App.css';
 import {writeFile} from "./libs/save";
 
 function App() {
@@ -12,6 +11,8 @@ function App() {
   });
   const [data, setData] = useState({});
   const [fileName, setFileName] = useState("");
+  const [version, setVersion] = useState(0);
+  const [timestamp, setTimestamp] = useState(0);
 
 
   const separator = {
@@ -24,10 +25,16 @@ function App() {
       const gvas = data.gvas;
       if (gvas && gvas.root) {
         if (content.json) {
-          gvas.root.properties = content.json;
+          gvas.root.properties = {
+            ...gvas.root.properties,
+            ...content.json
+          };
         } else if (content.text) {
           try {
-            gvas.root.properties = JSON.parse(content.text);
+            gvas.root.properties = {
+              ...gvas.root.properties,
+              ...JSON.parse(content.text)
+            };
           } catch {
             alert("Invalid Content");
             return;
@@ -62,16 +69,38 @@ function App() {
             saveType,
             gvas
           } = data;
-          console.log(lenDecompressed, lenCompressed)
-          setContent({ json: gvas.root.properties });
+
+          const rootProps = {...gvas.root.properties};
+
+          setVersion(rootProps.Version.Int.value);
+          setTimestamp(rootProps.Timestamp.Struct.value);
+          delete rootProps.Version;
+          delete rootProps.Timestamp;
+
+
+          setContent({ json: rootProps });
           setData(data);
           setFileName(fileName);
         }
       }
     >
-      <div className="App">
-        <div style={{ padding: 4, background: fileName ? "#3883fa" : "#fa3855", color: "white", textAlign: "center", fontSize: 16 }}>
-          {fileName ? `Editing ${fileName}` : `Drag a .sav file first`}
+      <div className="fullpage">
+        <div className={`status-bar ${fileName? "" : " error"}`}>
+          {
+            fileName ? (
+              <>
+                <div>Palworld.TF: Editing {fileName}</div>
+                <div className="space"></div>
+                <div>Version {version}; Modified {
+                  new Date(
+                    (timestamp.DateTime - 621355968000000000) / 10000
+                  ).toLocaleTimeString("en-US", { month: 'short', day: 'numeric' })
+                }</div>
+              </>
+            ) : (
+              <span>Palworld.TF: Drag a Palworld .sav file first</span>
+            )
+          }
         </div>
         <VanillaJSONEditor
           content={content}
@@ -80,6 +109,9 @@ function App() {
             return [customCopyButton, separator, ...items, space]
           }}
         />
+        <div className={`status-bar small`}>
+          made by ieb, based on uesave-rs
+        </div>
       </div>
     </Dropper>
   );
