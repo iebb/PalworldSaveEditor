@@ -1,0 +1,8 @@
+{
+  "extends": "react-app",
+  "root": true,
+  "env": {
+    "es2020": true,  // <- activate “es2020” globals
+    "browser": true
+  }
+}
