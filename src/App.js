@@ -11,8 +11,8 @@ function App() {
   });
   const [data, setData] = useState({});
   const [fileName, setFileName] = useState("");
-  const [version, setVersion] = useState(0);
-  const [timestamp, setTimestamp] = useState(0);
+  // const [version, setVersion] = useState(0);
+  // const [timestamp, setTimestamp] = useState(0);
 
 
   const separator = {
@@ -72,10 +72,10 @@ function App() {
 
           const rootProps = {...gvas.root.properties};
 
-          setVersion(rootProps.Version.Int.value);
-          setTimestamp(rootProps.Timestamp.Struct.value);
-          delete rootProps.Version;
-          delete rootProps.Timestamp;
+          // setVersion(rootProps.Version.Int.value);
+          // setTimestamp(rootProps.Timestamp.Struct.value);
+          // delete rootProps.Version;
+          // delete rootProps.Timestamp;
 
 
           setContent({ json: rootProps });
@@ -91,11 +91,7 @@ function App() {
               <>
                 <div>Palworld.TF: Editing {fileName}</div>
                 <div className="space"></div>
-                <div>Version {version}; Modified {
-                  new Date(
-                    (timestamp.DateTime - 621355968000000000) / 10000
-                  ).toLocaleTimeString("en-US", { month: 'short', day: 'numeric' })
-                }</div>
+                <div>{((data.lenDecompressed) / 1024).toFixed(1)}k decompressed, {((data.lenCompressed) / 1024).toFixed(1)}k compressed</div>
               </>
             ) : (
               <span>Palworld.TF: Drag a Palworld .sav file first</span>
