@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Palworld Save JSON Editor Sample",
+  "short_name": "Palworld Save JSON Editor",
+  "name": "Palworld Save JSON Editor",
   "icons": [
     {
       "src": "favicon.ico",
