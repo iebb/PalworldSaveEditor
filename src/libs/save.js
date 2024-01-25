@@ -1,9 +1,8 @@
-import pako from "pako";
-import {deserialize, serialize} from "./uesave";
+import {saveAs} from "file-saver";
 import * as LosslessJSON from 'lossless-json'
+import pako from "pako";
 import {Serializer} from "./Serializer";
-
-const { saveAs } = require("file-saver");
+import {deserialize, serialize} from "./uesave";
 
 
 export const analyzeFile = async (file) => {
@@ -19,14 +18,12 @@ export const analyzeFile = async (file) => {
 
           const lenDecompressed = serial.readInt32();
           const lenCompressed = serial.readInt32();
-          const magic = serial.read(3);
-          const saveType = serial.read(1);
+          const magic = serial.readInt32();
 
 
-          const data = serial.read(lenCompressed);
-          let decompressed = data;
+          let decompressed = serial.read(lenCompressed);
 
-          switch (saveType[0]) {
+          switch (magic & 0xff) {
             case 0x32:
               decompressed = pako.inflate(decompressed);
             // eslint-disable-next-line no-fallthrough
@@ -67,7 +64,6 @@ export const analyzeFile = async (file) => {
             lenDecompressed,
             lenCompressed,
             magic,
-            saveType,
             gvas
           });
         } catch (e) {
@@ -80,13 +76,13 @@ export const analyzeFile = async (file) => {
 }
 
 
-export const writeFile = async ({ magic, saveType, gvas }, filename = "save.sav") => {
+export const writeFile = async ({ magic, gvas }, filename = "save.sav") => {
 
   try {
     let serialized = serialize(LosslessJSON.stringify(gvas));
     const lenDecompressed = serialized.length;
 
-    switch (saveType[0]) {
+    switch (magic & 0xff) {
       case 0x32:
         serialized = pako.deflate(serialized);
       // eslint-disable-next-line no-fallthrough
@@ -100,8 +96,7 @@ export const writeFile = async ({ magic, saveType, gvas }, filename = "save.sav"
 
     buf.writeInt32LE(lenDecompressed);
     buf.writeInt32LE(lenCompressed, 4);
-    buf.set(magic, 8);
-    buf.set(saveType, 11);
+    buf.writeInt32LE(magic, 8);
     buf.set(serialized, 12);
     saveAs(new Blob([buf], {type: "application/binary"}), filename);
   } catch (e) {

@@ -44,7 +44,6 @@ function App() {
         }
         await writeFile({
           magic: data.magic,
-          saveType: data.saveType,
           gvas,
         }, data.fileName);
       } else {
@@ -68,7 +67,6 @@ function App() {
             lenDecompressed,
             lenCompressed,
             magic,
-            saveType,
             gvas
           } = data;
 
