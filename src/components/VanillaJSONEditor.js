@@ -4,9 +4,7 @@ import "./VanillaJSONEditor.css";
 import { parse, stringify } from 'lossless-json'
 const LosslessJSONParser = { parse, stringify }
 
-export default function VanillaJSONEditor(_props) {
-  const props = {..._props, parser: LosslessJSONParser}
-
+export default function VanillaJSONEditor(props) {
   const refContainer = useRef(null);
   const refEditor = useRef(null);
 
@@ -29,9 +27,9 @@ export default function VanillaJSONEditor(_props) {
   // update props
   useEffect(() => {
     if (refEditor.current) {
-      refEditor.current.updateProps(props);
+      refEditor.current.updateProps({...props, parser: LosslessJSONParser});
     }
-  }, [_props]);
+  }, [props]);
 
   return <div className="vanilla-jsoneditor-react" ref={refContainer}></div>;
 }

@@ -64,9 +64,6 @@ function App() {
         (data) => {
           const {
             fileName,
-            lenDecompressed,
-            lenCompressed,
-            magic,
             gvas
           } = data;
 
@@ -79,16 +76,21 @@ function App() {
       }
     >
       <div className="fullpage">
-        <div className={`status-bar ${fileName? "" : " error"}`}>
+        <div className={`status-bar ${fileName ? "" : " error"}`}>
+          <div>Palworld.TF</div>
           {
             fileName ? (
               <>
-                <div>Palworld.TF: Editing {fileName}</div>
+                <div>Editing {fileName}</div>
                 <div className="space"></div>
                 <div>{formatSize(data.lenDecompressed)} decompressed, {formatSize(data.lenCompressed)} compressed</div>
               </>
             ) : (
-              <span>Palworld.TF: Drag a Palworld .sav file first</span>
+              <>
+                <div>Drag a Palworld .sav file first</div>
+                <div className="space"></div>
+                <div>Does not work? <a href="https://github.com/iebb/PalworldSaveEditor/issues">github issues</a></div>
+              </>
             )
           }
         </div>
@@ -100,7 +102,9 @@ function App() {
           }}
         />
         <div className={`status-bar small`}>
-          <div><a href="https://github.com/iebb/PalworldSaveEditor/issues">issues / github</a></div>
+          <div>
+            <a href="https://github.com/iebb/PalworldSaveEditor/issues">issues</a> <a href={`https://github.com/iebb/PalworldSaveEditor/commit/${__COMMIT_HASH__}`}>github commit {__COMMIT_HASH__}</a>
+          </div>
           <div>made by ieb, based on uesave-rs</div>
           <div>some files such as "Level.sav" could be huge and would take minutes to load.</div>
         </div>

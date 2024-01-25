@@ -1,6 +1,9 @@
 {
   "extends": "react-app",
   "root": true,
+  "globals": {
+    "__COMMIT_HASH__": true
+  },
   "env": {
     "es2020": true,  // <- activate “es2020” globals
     "browser": true

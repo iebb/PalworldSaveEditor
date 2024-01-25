@@ -1,4 +1,8 @@
 const webpack = require("webpack")
+let commitHash = require('child_process')
+  .execSync('git rev-parse --short HEAD')
+  .toString()
+  .trim();
 
 module.exports = function override(config, env) {
   //do stuff with the webpack config...
@@ -26,6 +30,9 @@ module.exports = function override(config, env) {
   config.resolve.extensions = [...config.resolve.extensions, ".ts", ".js"]
   config.plugins = [
     ...config.plugins,
+    new webpack.DefinePlugin({
+      __COMMIT_HASH__: JSON.stringify(commitHash)
+    }),
     new webpack.ProvidePlugin({
       process: "process/browser",
       Buffer: ["buffer", "Buffer"],
