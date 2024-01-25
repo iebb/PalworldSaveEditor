@@ -100,7 +100,8 @@ export const writeFile = async ({ magic, saveType, gvas }, filename = "save.sav"
 
     buf.writeInt32LE(lenDecompressed);
     buf.writeInt32LE(lenCompressed, 4);
-    buf.writeInt32LE(magic * 256 + saveType, 8);
+    buf.set(magic, 8);
+    buf.writeInt8(saveType, 11);
     buf.set(serialized, 12);
     saveAs(new Blob([buf], {type: "application/binary"}), filename);
   } catch (e) {
