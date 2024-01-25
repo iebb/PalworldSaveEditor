@@ -1,6 +1,6 @@
 import pako from "pako";
-import {deserialize, deserialize_to_msgpack, serialize} from "./uesave";
-import { encode, decode } from "@msgpack/msgpack";
+import {deserialize, serialize} from "./uesave";
+import * as LosslessJSON from 'lossless-json'
 import {Serializer} from "./Serializer";
 
 const { saveAs } = require("file-saver");
@@ -59,7 +59,7 @@ export const analyzeFile = async (file) => {
           );
 
           console.time("deserialize");
-          const gvas = JSON.parse(deserialize(decompressed, typeMap));
+          const gvas = LosslessJSON.parse(deserialize(decompressed, typeMap));
           console.timeEnd("deserialize");
 
           resolve({
@@ -83,7 +83,7 @@ export const analyzeFile = async (file) => {
 export const writeFile = async ({ magic, saveType, gvas }, filename = "save.sav") => {
 
   try {
-    let serialized = serialize(JSON.stringify(gvas));
+    let serialized = serialize(LosslessJSON.stringify(gvas));
     const lenDecompressed = serialized.length;
 
     switch (saveType[0]) {

@@ -20,6 +20,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "build-rust": "wasm-pack build rust/uesave-wasm --out-dir ../../src/uesave",
     "predeploy": "react-app-rewired build",
     "deploy": "gh-pages -d build",
     "start": "react-app-rewired start",

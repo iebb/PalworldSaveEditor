@@ -1,6 +1,7 @@
 import {useState} from "react";
 import VanillaJSONEditor from "./components/VanillaJSONEditor";
 import {Dropper} from "./components/Dropper";
+import * as LosslessJSON from 'lossless-json';
 import { faSave } from '@fortawesome/free-regular-svg-icons'
 import {writeFile} from "./libs/save";
 
@@ -33,7 +34,7 @@ function App() {
           try {
             gvas.root.properties = {
               ...gvas.root.properties,
-              ...JSON.parse(content.text)
+              ...LosslessJSON.parse(content.text)
             };
           } catch {
             alert("Invalid Content");
