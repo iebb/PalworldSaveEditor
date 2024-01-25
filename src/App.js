@@ -3,6 +3,7 @@ import VanillaJSONEditor from "./components/VanillaJSONEditor";
 import {Dropper} from "./components/Dropper";
 import * as LosslessJSON from 'lossless-json';
 import { faSave } from '@fortawesome/free-regular-svg-icons'
+import {formatSize} from "./libs/formatSize";
 import {writeFile} from "./libs/save";
 
 function App() {
@@ -86,7 +87,7 @@ function App() {
               <>
                 <div>Palworld.TF: Editing {fileName}</div>
                 <div className="space"></div>
-                <div>{((data.lenDecompressed) / 1048576).toFixed(2)}M decompressed, {((data.lenCompressed) / 1048576).toFixed(2)}M compressed</div>
+                <div>{formatSize(data.lenDecompressed)} decompressed, {formatSize(data.lenCompressed)} compressed</div>
               </>
             ) : (
               <span>Palworld.TF: Drag a Palworld .sav file first</span>
