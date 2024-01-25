@@ -23,7 +23,8 @@ export const analyzeFile = async (file) => {
 
           let decompressed = serial.read(lenCompressed);
 
-          switch (magic & 0xff) {
+
+          switch ((magic & 0xff000000) >> 24) {
             case 0x32:
               decompressed = pako.inflate(decompressed);
             // eslint-disable-next-line no-fallthrough
@@ -82,7 +83,7 @@ export const writeFile = async ({ magic, gvas }, filename = "save.sav") => {
     let serialized = serialize(LosslessJSON.stringify(gvas));
     const lenDecompressed = serialized.length;
 
-    switch (magic & 0xff) {
+    switch ((magic & 0xff000000) >> 24) {
       case 0x32:
         serialized = pako.deflate(serialized);
       // eslint-disable-next-line no-fallthrough
