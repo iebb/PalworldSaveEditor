@@ -1,10 +1,11 @@
-import {useState} from "react";
-import VanillaJSONEditor from "./components/VanillaJSONEditor";
-import {Dropper} from "./components/Dropper";
+import {faSave, faFileCode} from '@fortawesome/free-regular-svg-icons'
 import * as LosslessJSON from 'lossless-json';
-import { faSave } from '@fortawesome/free-regular-svg-icons'
+import {useState} from "react";
+import {Dropper} from "./components/Dropper";
+import VanillaJSONEditor from "./components/VanillaJSONEditor";
 import {formatSize} from "./libs/formatSize";
 import {writeFile} from "./libs/save";
+import {saveAs} from "file-saver";
 
 function App() {
   const [content, setContent] = useState({
@@ -16,37 +17,61 @@ function App() {
   // const [version, setVersion] = useState(0);
   // const [timestamp, setTimestamp] = useState(0);
 
+  const getModifiedGvas = () => {
+    const gvas = data.gvas;
+    if (gvas && gvas.root) {
+      if (content.json) {
+        gvas.root.properties = {
+          ...gvas.root.properties,
+          ...content.json
+        };
+      } else if (content.text) {
+        try {
+          gvas.root.properties = {
+            ...gvas.root.properties,
+            ...LosslessJSON.parse(content.text)
+          };
+        } catch {
+          throw new Error("Invalid Content");
+        }
+      }
+    } else {
+      throw new Error("File Not Loaded");
+    }
+    return gvas;
+  }
+
 
   const separator = {
     type: 'separator'
   }
 
+  const customCodeButton = {
+    type: 'button',
+    onClick: async () => {
+      try {
+        const gvas = getModifiedGvas();
+        saveAs(new Blob([
+          LosslessJSON.stringify(gvas)
+        ], {type: "application/json"}), data.fileName + ".json");
+      } catch (e) {
+        alert("Invalid Content")
+      }
+    },
+    icon: faFileCode,
+    title: 'Export JSON',
+  }
+
   const customCopyButton = {
     type: 'button',
     onClick: async () => {
-      const gvas = data.gvas;
-      if (gvas && gvas.root) {
-        if (content.json) {
-          gvas.root.properties = {
-            ...gvas.root.properties,
-            ...content.json
-          };
-        } else if (content.text) {
-          try {
-            gvas.root.properties = {
-              ...gvas.root.properties,
-              ...LosslessJSON.parse(content.text)
-            };
-          } catch {
-            alert("Invalid Content");
-            return;
-          }
-        }
+      try {
+        const gvas = getModifiedGvas();
         await writeFile({
           magic: data.magic,
           gvas,
         }, data.fileName);
-      } else {
+      } catch (e) {
         alert("Invalid Content")
       }
     },
@@ -98,12 +123,18 @@ function App() {
           content={content}
           onChange={setContent}
           onRenderMenu={(items, context) => {
-            return [customCopyButton, separator, ...items, space]
+            return [customCopyButton, separator, ...items.slice(0, -1), separator, customCodeButton, space]
           }}
         />
         <div className={`status-bar small`}>
           <div>
-            <a href="https://github.com/iebb/PalworldSaveEditor/issues">issues</a> <a href={`https://github.com/iebb/PalworldSaveEditor/commit/${__COMMIT_HASH__}`}>github commit {__COMMIT_HASH__}</a>
+            <a href="https://github.com/iebb/PalworldSaveEditor/issues">issues</a>
+          </div>
+          <div>
+            <a href={`https://github.com/iebb/PalworldSaveEditor/`}>github</a>
+          </div>
+          <div>
+            commit {__COMMIT_HASH__}
           </div>
           <div>made by ieb, based on uesave-rs</div>
           <div>some files such as "Level.sav" could be huge and would take minutes to load.</div>
