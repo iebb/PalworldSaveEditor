@@ -27,16 +27,21 @@ function App() {
       }
     >
       <div className="fullpage">
-        <div className={`status-bar ${fileName? "" : " error"}`}>
+        <div className={`status-bar ${fileName ? "" : " error"}`}>
+          <div>Palworld.TF</div>
           {
             fileName ? (
               <>
-                <div>Palworld.TF: Editing {fileName}</div>
+                <div>Editing {fileName}</div>
                 <div className="space"></div>
                 <div>{formatSize(data.lenDecompressed)} decompressed, {formatSize(data.lenCompressed)} compressed</div>
               </>
             ) : (
-              <span>Palworld.TF: Drag a Palworld .sav file first</span>
+              <>
+                <div>Drag a Palworld .sav file first</div>
+                <div className="space"></div>
+                <div>Does not work? <a href="https://github.com/iebb/PalworldSaveEditor/issues">github issues</a></div>
+              </>
             )
           }
         </div>
@@ -45,10 +50,20 @@ function App() {
           content={content}
           onChange={setContent}
         />
-        <div className={`status-bar small`}>
-          <div><a href="https://github.com/iebb/PalworldSaveEditor/issues">issues / github</a></div>
+        <div className={`status-bar small bottom-status-bar`}>
+          <div>
+            <a href="https://github.com/iebb/PalworldSaveEditor/issues">issues</a>
+          </div>
+          <div>
+            <a href={`https://github.com/iebb/PalworldSaveEditor/`}>github</a>
+          </div>
           <div>made by ieb, based on uesave-rs</div>
-          <div>some files such as "Level.sav" could be huge and would take minutes to load.</div>
+          <div>
+            <a href="https://www.vultr.com/?ref=9346006-8H">hosting: try vultr, $100 free credit to test out for 14d</a>
+          </div>
+          <div>
+            commit {__COMMIT_HASH__}
+          </div>
         </div>
       </div>
     </Dropper>
