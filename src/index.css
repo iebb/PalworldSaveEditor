@@ -13,7 +13,13 @@ code {
 }
 
 .vanilla-jsoneditor-react {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   height: 100%
+}
+.jse-main {
+  flex: 1;
 }
 
 .fullpage {
@@ -29,12 +35,13 @@ code {
 }
 
 .status-bar {
+  flex-grow: 0;
+  flex-shrink: 0;
   padding: 8px 8px;
   background: #3883fa;
   color: white;
   text-align: center;
   font-size: 15px;
-  flex-grow: 0;
   display: flex;
   gap: 10px;
 }

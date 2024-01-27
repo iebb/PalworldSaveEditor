@@ -1,6 +1,5 @@
 import { JSONEditor } from 'vanilla-jsoneditor/standalone.js'
 import { useEffect, useRef } from "react";
-import "./VanillaJSONEditor.css";
 import { parse, stringify } from 'lossless-json'
 const LosslessJSONParser = { parse, stringify }
 
