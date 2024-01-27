@@ -126,18 +126,20 @@ function App() {
             return [customCopyButton, separator, ...items.slice(0, -1), separator, customCodeButton, space]
           }}
         />
-        <div className={`status-bar small`}>
+        <div className={`status-bar small bottom-status-bar`}>
           <div>
             <a href="https://github.com/iebb/PalworldSaveEditor/issues">issues</a>
           </div>
           <div>
             <a href={`https://github.com/iebb/PalworldSaveEditor/`}>github</a>
           </div>
+          <div>made by ieb, based on uesave-rs</div>
+          <div>
+            <a href="https://www.vultr.com/?ref=9346006-8H">hosting: try vultr, $100 free credit to test out for 14d</a>
+          </div>
           <div>
             commit {__COMMIT_HASH__}
           </div>
-          <div>made by ieb, based on uesave-rs</div>
-          <div>some files such as "Level.sav" could be huge and would take minutes to load.</div>
         </div>
       </div>
     </Dropper>
