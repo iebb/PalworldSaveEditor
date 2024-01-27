@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "./",
   "dependencies": {
+    "@fortawesome/free-regular-svg-icons": "^6.5.1",
     "@msgpack/msgpack": "^3.0.0-beta2",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -20,7 +21,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "build-rust": "wasm-pack build rust/uesave-wasm --out-dir ../../src/uesave",
+    "build-rust": "wasm-pack build rust/uesave-wasm --out-dir ../../src/libs/uesave",
     "predeploy": "react-app-rewired build",
     "deploy": "gh-pages -d build",
     "start": "react-app-rewired start",

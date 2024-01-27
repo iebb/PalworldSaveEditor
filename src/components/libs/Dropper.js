@@ -1,5 +1,5 @@
 import Dropzone from "react-dropzone";
-import {analyzeFile} from "../libs/save";
+import {analyzeFile} from "../../libs/save";
 
 export const Dropper = ({ children, setFile }) => {
   const openFile = async (f) => {
