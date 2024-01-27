@@ -25,7 +25,7 @@ export const analyzeFile = async (file) => {
 
 
           // eslint-disable-next-line default-case
-          switch ((magic & 0xff000000) >> 24) {
+          switch (magic >> 24) {
             case 0x32:
               decompressed = pako.inflate(decompressed);
             // eslint-disable-next-line no-fallthrough
@@ -69,6 +69,7 @@ export const analyzeFile = async (file) => {
             gvas
           });
         } catch (e) {
+          console.log(e);
           alert("Is it really a Palworld Save?");
         }
       };
@@ -85,7 +86,7 @@ export const writeFile = async ({ magic, gvas }, filename = "save.sav") => {
     const lenDecompressed = serialized.length;
 
     // eslint-disable-next-line default-case
-    switch ((magic & 0xff000000) >> 24) {
+    switch (magic >> 24) {
       case 0x32:
         serialized = pako.deflate(serialized);
       // eslint-disable-next-line no-fallthrough
