@@ -73,6 +73,7 @@ export const RawEditor = ({data, content, setContent}) => {
 
   return (
     <VanillaJSONEditor
+      parser={{ parse: LosslessJSON.parse, stringify: LosslessJSON.stringify }}
       content={content}
       onChange={setContent}
       onRenderMenu={(items, context) => {

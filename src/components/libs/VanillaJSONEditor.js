@@ -1,7 +1,5 @@
-import { JSONEditor } from 'vanilla-jsoneditor/standalone.js'
-import { useEffect, useRef } from "react";
-import { parse, stringify } from 'lossless-json'
-const LosslessJSONParser = { parse, stringify }
+import {useEffect, useRef} from "react";
+import {JSONEditor} from 'vanilla-jsoneditor/standalone.js'
 
 export default function VanillaJSONEditor(props) {
   const refContainer = useRef(null);
@@ -26,7 +24,7 @@ export default function VanillaJSONEditor(props) {
   // update props
   useEffect(() => {
     if (refEditor.current) {
-      refEditor.current.updateProps({...props, parser: LosslessJSONParser});
+      refEditor.current.updateProps({...props});
     }
   }, [props]);
 

@@ -48,7 +48,7 @@ function App() {
         <RawEditor
           data={data}
           content={content}
-          onChange={setContent}
+          setContent={setContent}
         />
         <div className={`status-bar small bottom-status-bar`}>
           <div>
