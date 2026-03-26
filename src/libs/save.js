@@ -4,6 +4,37 @@ import pako from "pako";
 import {Serializer} from "./Serializer";
 import initUesave, {deserialize, serialize} from "./uesave/uesave_wasm";
 
+// Recursively preserve types from original JSON when tree editor mangles them.
+// The tree editor converts LosslessNumber→object/array and string "1234"→integer 1234.
+function preserveTypes(original, edited) {
+  // LosslessNumber got mangled by tree editor
+  if (LosslessJSON.isLosslessNumber(original)) {
+    if (typeof edited === 'number' || typeof edited === 'string') {
+      return new LosslessJSON.LosslessNumber(String(edited));
+    }
+    // Tree editor converted to object/array - keep original value
+    return original;
+  }
+  // String became number or LosslessNumber
+  if (typeof original === 'string' && (typeof edited === 'number' || LosslessJSON.isLosslessNumber(edited))) {
+    return String(edited);
+  }
+  // Recurse into objects
+  if (original && edited && typeof original === 'object' && typeof edited === 'object') {
+    if (Array.isArray(original) && Array.isArray(edited)) {
+      return edited.map((item, i) => i < original.length ? preserveTypes(original[i], item) : item);
+    }
+    const result = {...edited};
+    for (const key in result) {
+      if (key in original) {
+        result[key] = preserveTypes(original[key], result[key]);
+      }
+    }
+    return result;
+  }
+  return edited;
+}
+
 // Magic byte signatures (lower 3 bytes of the magic int32 LE)
 const MAGIC_PLZ = 0x5A6C50; // "PlZ" - zlib compression
 const MAGIC_PLM = 0x4D6C50; // "PlM" - Oodle Mermaid compression
@@ -123,9 +154,17 @@ export const writeFile = async ({ magic, gvas, rawJson }, filename = "save.sav")
 
   try {
     await initWasm();
-    // Use rawJson (original from deserialize) to preserve exact types.
-    // If user edited via tree editor, re-apply edits onto the raw JSON structure.
-    const jsonStr = rawJson || LosslessJSON.stringify(gvas);
+    // Merge user edits while preserving original types
+    // (tree editor converts string "1234" to integer 1234, breaking serde)
+    let jsonStr;
+    if (rawJson) {
+      const originalGvas = LosslessJSON.parse(rawJson);
+      const merged = preserveTypes(originalGvas.root.properties, gvas.root.properties);
+      originalGvas.root.properties = merged;
+      jsonStr = LosslessJSON.stringify(originalGvas);
+    } else {
+      jsonStr = LosslessJSON.stringify(gvas);
+    }
     let serialized = serialize(jsonStr);
     const lenDecompressed = serialized.length;
 
