@@ -2,8 +2,30 @@ import {saveAs} from "file-saver";
 import * as LosslessJSON from 'lossless-json'
 import pako from "pako";
 import {Serializer} from "./Serializer";
-import {deserialize, serialize} from "./uesave";
+import initUesave, {deserialize, serialize} from "./uesave/uesave_wasm";
 
+// Magic byte signatures (lower 3 bytes of the magic int32 LE)
+const MAGIC_PLZ = 0x5A6C50; // "PlZ" - zlib compression
+const MAGIC_PLM = 0x4D6C50; // "PlM" - Oodle Mermaid compression
+
+// Initialize WASM modules
+let uesaveReady = false;
+let oozDecompress = null;
+
+const initWasm = async () => {
+  if (!uesaveReady) {
+    await initUesave(process.env.PUBLIC_URL + '/uesave_wasm_bg.wasm');
+    uesaveReady = true;
+  }
+  if (!oozDecompress) {
+    try {
+      const ooz = await import("./oozLoader");
+      oozDecompress = ooz.decompress;
+    } catch (e) {
+      console.warn("Oodle decompression not available, PlM format not supported:", e);
+    }
+  }
+};
 
 export const analyzeFile = async (file) => {
   return new Promise((resolve) => {
@@ -14,24 +36,39 @@ export const analyzeFile = async (file) => {
         const serial = new Serializer(Buffer.from(reader.result));
 
         try {
-
+          await initWasm();
 
           const lenDecompressed = serial.readInt32();
           const lenCompressed = serial.readInt32();
           const magic = serial.readInt32();
 
+          const magicBytes = magic & 0x00FFFFFF; // lower 3 bytes: PlZ or PlM
+          const saveType = (magic >> 24) & 0xFF; // upper byte: compression level
 
-          let decompressed = serial.read(lenCompressed);
+          let compressedData = serial.read(lenCompressed);
+          let decompressed;
 
-
-          // eslint-disable-next-line default-case
-          switch (magic >> 24) {
-            case 0x32:
-              decompressed = pako.inflate(decompressed);
-            // eslint-disable-next-line no-fallthrough
-            case 0x31:
-              decompressed = pako.inflate(decompressed);
-              break;
+          if (magicBytes === MAGIC_PLM) {
+            // PlM = Oodle (Mermaid) compression
+            if (!oozDecompress) {
+              throw new Error("Oodle decompression (ooz-wasm) not available. PlM format saves require this module.");
+            }
+            decompressed = await oozDecompress(
+              new Uint8Array(compressedData),
+              lenDecompressed
+            );
+          } else {
+            // PlZ = zlib compression
+            // eslint-disable-next-line default-case
+            switch (saveType) {
+              case 0x32:
+                compressedData = pako.inflate(compressedData);
+              // eslint-disable-next-line no-fallthrough
+              case 0x31:
+                compressedData = pako.inflate(compressedData);
+                break;
+            }
+            decompressed = compressedData;
           }
 
 
@@ -58,7 +95,9 @@ export const analyzeFile = async (file) => {
           );
 
           console.time("deserialize");
-          const gvas = LosslessJSON.parse(deserialize(decompressed, typeMap));
+          const data = decompressed instanceof Uint8Array ? decompressed : new Uint8Array(decompressed);
+          const rawJson = deserialize(data, typeMap);
+          const gvas = LosslessJSON.parse(rawJson);
           console.timeEnd("deserialize");
 
           resolve({
@@ -66,7 +105,8 @@ export const analyzeFile = async (file) => {
             lenDecompressed,
             lenCompressed,
             magic,
-            gvas
+            gvas,
+            rawJson,
           });
         } catch (e) {
           console.log(e);
@@ -79,14 +119,29 @@ export const analyzeFile = async (file) => {
 }
 
 
-export const writeFile = async ({ magic, gvas }, filename = "save.sav") => {
+export const writeFile = async ({ magic, gvas, rawJson }, filename = "save.sav") => {
 
   try {
-    let serialized = serialize(LosslessJSON.stringify(gvas));
+    await initWasm();
+    // Use rawJson (original from deserialize) to preserve exact types.
+    // If user edited via tree editor, re-apply edits onto the raw JSON structure.
+    const jsonStr = rawJson || LosslessJSON.stringify(gvas);
+    let serialized = serialize(jsonStr);
     const lenDecompressed = serialized.length;
 
+    const magicBytes = magic & 0x00FFFFFF;
+
+    // ooz-wasm doesn't support compression, so PlM saves are written back as PlZ (double zlib)
+    // Palworld can read both formats
+    let writeMagic = magic;
+    if (magicBytes === MAGIC_PLM) {
+      // Convert PlM -> PlZ with double zlib compression (saveType 0x32)
+      writeMagic = (0x32 << 24) | MAGIC_PLZ;
+    }
+
+    const saveType = (writeMagic >> 24) & 0xFF;
     // eslint-disable-next-line default-case
-    switch (magic >> 24) {
+    switch (saveType) {
       case 0x32:
         serialized = pako.deflate(serialized);
       // eslint-disable-next-line no-fallthrough
@@ -100,10 +155,11 @@ export const writeFile = async ({ magic, gvas }, filename = "save.sav") => {
 
     buf.writeInt32LE(lenDecompressed);
     buf.writeInt32LE(lenCompressed, 4);
-    buf.writeInt32LE(magic, 8);
+    buf.writeInt32LE(writeMagic, 8);
     buf.set(serialized, 12);
     saveAs(new Blob([buf], {type: "application/binary"}), filename);
   } catch (e) {
+    console.error("Serialization error:", e);
     alert("Serialization failed. Have you accidentally removed something?");
   }
 

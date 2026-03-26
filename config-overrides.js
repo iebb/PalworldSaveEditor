@@ -1,18 +1,29 @@
 const webpack = require("webpack")
-let commitHash = require('child_process')
-  .execSync('git rev-parse --short HEAD')
-  .toString()
-  .trim();
+let commitHash;
+try {
+  commitHash = require('child_process')
+    .execSync('git rev-parse --short HEAD')
+    .toString()
+    .trim();
+} catch (e) {
+  commitHash = 'unknown';
+}
 
 module.exports = function override(config, env) {
   //do stuff with the webpack config...
   config.experiments = {
     asyncWebAssembly: true,
+    topLevelAwait: true,
   };
 
   config.resolve.fallback = {
     ...config.resolve.fallback,
     buffer: require.resolve("buffer"),
+    module: false,
+    path: false,
+    fs: false,
+    url: false,
+    crypto: false,
   }
 
   config.module.rules

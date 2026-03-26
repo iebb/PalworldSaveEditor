@@ -58,6 +58,7 @@ export const RawEditor = ({data, content, setContent}) => {
         await writeFile({
           magic: data.magic,
           gvas,
+          rawJson: data.rawJson,
         }, data.fileName);
       } catch (e) {
         alert("Invalid Content")
